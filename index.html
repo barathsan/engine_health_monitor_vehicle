@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Engine Health Monitoring System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <h1>ENGINE HEALTH MONITORING SYSTEM</h1>
+    <p>Real-Time Vehicle Parameter Monitoring & Health Analysis</p>
+    <span class="tag">ESP32 / Arduino Based Project</span>
+</header>
+
+<main>
+    <section class="panel">
+        <h2>Vehicle Selection</h2>
+
+        <label for="vehicle">Select Vehicle</label>
+        <select id="vehicle">
+            <option value="FZS">Yamaha FZ-S FI V4</option>
+            <option value="RAYZR">Yamaha RayZR 125 Fi Hybrid</option>
+        </select>
+
+        <div class="vehicle-info" id="vehicleInfo">
+            Selected vehicle: Yamaha FZ-S FI V4
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Engine Sensor Parameters</h2>
+
+        <div class="grid">
+            <div>
+                <label for="rpm">Engine RPM</label>
+                <input type="number" id="rpm" value="1500" min="0">
+                <small>Unit: RPM</small>
+            </div>
+
+            <div>
+                <label for="speed">Vehicle Speed</label>
+                <input type="number" id="speed" value="20" min="0">
+                <small>Unit: km/h</small>
+            </div>
+
+            <div>
+                <label for="temperature">Engine Surface Temperature</label>
+                <input type="number" id="temperature" value="75" step="0.1">
+                <small>Unit: °C</small>
+            </div>
+
+            <div>
+                <label for="vibration">Vibration RMS</label>
+                <input type="number" id="vibration" value="1.5" step="0.01" min="0">
+                <small>Unit: m/s²</small>
+            </div>
+
+            <div>
+                <label for="voltage">Battery Voltage</label>
+                <input type="number" id="voltage" value="12.5" step="0.1">
+                <small>Unit: V</small>
+            </div>
+
+            <div>
+                <label for="rpmVariation">RPM Variation</label>
+                <input type="number" id="rpmVariation" value="40" min="0">
+                <small>Unit: RPM standard deviation</small>
+            </div>
+
+            <div>
+                <label for="throttle">Throttle Position</label>
+                <input type="number" id="throttle" value="20" min="0" max="100">
+                <small>Unit: %</small>
+            </div>
+
+            <div>
+                <label for="intakeTemp">Intake Air Temperature</label>
+                <input type="number" id="intakeTemp" value="32" step="0.1">
+                <small>Unit: °C</small>
+            </div>
+
+            <div>
+                <label for="oilTemp">Engine Oil / Crankcase Temperature</label>
+                <input type="number" id="oilTemp" value="70" step="0.1">
+                <small>Unit: °C</small>
+            </div>
+
+            <div>
+                <label for="oilPressure">Oil Pressure (Optional)</label>
+                <input type="number" id="oilPressure" placeholder="Enter if measured" step="0.1">
+                <small>Unit: kPa</small>
+            </div>
+
+            <div>
+                <label for="fuel">Fuel Consumption (Optional)</label>
+                <input type="number" id="fuel" placeholder="Enter if measured" step="0.1">
+                <small>Unit: L/h</small>
+            </div>
+
+            <div>
+                <label for="duration">Test Duration</label>
+                <input type="number" id="duration" value="60" min="1">
+                <small>Unit: seconds</small>
+            </div>
+        </div>
+
+        <div class="button-row">
+            <button onclick="analyseHealth()">Analyse Engine Health</button>
+            <button class="secondary" onclick="loadNormal()">Normal Sample</button>
+            <button class="secondary" onclick="loadVibration()">Vibration Sample</button>
+            <button class="secondary" onclick="loadTemperature()">High Temperature Sample</button>
+            <button class="secondary" onclick="loadBattery()">Low Battery Sample</button>
+            <button class="reset" onclick="resetForm()">Reset</button>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Engine Health Analysis</h2>
+
+        <div id="healthResult" class="result neutral">
+            <h3>Waiting for Input</h3>
+            <p>Enter sensor values and click Analyse Engine Health.</p>
+        </div>
+
+        <div id="alerts"></div>
+
+        <h3>Parameter Assessment</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Measured Value</th>
+                        <th>Assessment</th>
+                    </tr>
+                </thead>
+                <tbody id="assessmentTable">
+                    <tr>
+                        <td colspan="3">No analysis performed yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Reference vs Display Value Error Calculator</h2>
+        <p>Enter the reference sensor value and the value displayed by your monitoring system.</p>
+
+        <div class="grid">
+            <div>
+                <label for="parameterName">Parameter</label>
+                <select id="parameterName">
+                    <option>RPM</option>
+                    <option>Speed</option>
+                    <option>Temperature</option>
+                    <option>Vibration</option>
+                    <option>Battery Voltage</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="referenceValue">Reference Value</label>
+                <input type="number" id="referenceValue" step="any">
+            </div>
+
+            <div>
+                <label for="displayValue">Display Value</label>
+                <input type="number" id="displayValue" step="any">
+            </div>
+        </div>
+
+        <button onclick="calculateError()">Calculate Error</button>
+        <div id="errorResult" class="error-result">
+            Error calculation will appear here.
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Data Records</h2>
+        <p>Each analysis can be stored in the table and exported as a CSV file.</p>
+
+        <div class="button-row">
+            <button onclick="exportCSV()">Download CSV Report</button>
+            <button class="reset" onclick="clearRecords()">Clear Records</button>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Vehicle</th>
+                        <th>RPM</th>
+                        <th>Speed</th>
+                        <th>Temperature</th>
+                        <th>Vibration</th>
+                        <th>Battery</th>
+                        <th>Health Status</th>
+                    </tr>
+                </thead>
+                <tbody id="recordsTable">
+                    <tr>
+                        <td colspan="8">No records available.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <p>Engine Health Monitoring System | Academic Project</p>
+    <p>Prototype screening tool – not a certified vehicle diagnostic device.</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
